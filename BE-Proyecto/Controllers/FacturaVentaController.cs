@@ -94,6 +94,7 @@ namespace BE_Proyecto.Controllers
                 var facturaVenta = _mapper.Map<FacturaVenta>(facturaVentaDTO);
 
                 facturaVenta.FechaCreacion = DateTime.Now;
+                facturaVenta.FechaVenta = DateTime.Now;
                 facturaVenta = await _facturaVentaRepository.agregarFacturaVenta(facturaVenta);
 
                 var FacturaVentaItemDTO = _mapper.Map<FacturaVentaDTO>(facturaVenta);
@@ -135,6 +136,23 @@ namespace BE_Proyecto.Controllers
                 return BadRequest(ex.Message);
 
             }
+        }
+
+        //consultas dashboard
+        [HttpGet("ventasUltimos7D")]
+        public async Task<IActionResult> OtenerCantidadReservasProximaSemana()
+        {
+
+            int cantidadVts7D = await _facturaVentaRepository.CantidadVentasUltimos7D();
+
+            return Ok(cantidadVts7D);
+        }
+
+        [HttpGet("totalRegistros")]
+        public async Task<IActionResult> ObtenerCantidadTotalVentas()
+        {
+            int cantidadVentas= await _facturaVentaRepository.CantidadTotalVentas();
+            return Ok(cantidadVentas);
         }
     }
 }

@@ -13,5 +13,9 @@ namespace BE_Proyecto.Repository
         Task<FacturaVenta> agregarFacturaVenta(FacturaVenta facturaVenta);
 
         Task ActualizarFacturaVenta(FacturaVenta facturaVenta);
+
+        Task<int> CantidadVentasUltimos7D();
+
+        Task<int> CantidadTotalVentas();
     }
 }

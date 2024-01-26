@@ -43,6 +43,8 @@ builder.Services.AddScoped<IServicioRepository, ServicioRepository>();
 builder.Services.AddScoped<IFacturaAlquilerRepository, FacturaAlquilerRepository>();
 builder.Services.AddScoped<IFacturaVentaRepository, FacturaVentaRepository>();
 
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -62,5 +62,20 @@ namespace BE_Proyecto.Repository
             }
 
         }
+
+        public async Task<int> CantidadVentasUltimos7D()
+        {
+            DateTime fechaActual = DateTime.Now;
+            DateTime fechaLimite = fechaActual.AddDays(-7);
+
+            return await _context.FacturasVenta
+                .Where(x => x.FechaCreacion >= fechaLimite && x.FechaCreacion <= fechaActual)
+                .CountAsync();
+        }
+
+        public async Task<int> CantidadTotalVentas()
+        {
+            return await _context.FacturasVenta.CountAsync();
+        }
     }
 }

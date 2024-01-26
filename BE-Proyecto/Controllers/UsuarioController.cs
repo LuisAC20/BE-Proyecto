@@ -1,4 +1,7 @@
-﻿using BE_Proyecto.Models;
+﻿using AutoMapper;
+using BE_Proyecto.Models;
+using BE_Proyecto.Models.DTO;
+using BE_Proyecto.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +12,13 @@ namespace BE_Proyecto.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
-        private readonly AplicationDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly IUsuarioRepository _usuarioRepository;
 
-        public UsuarioController(AplicationDbContext context)
+        public UsuarioController(IMapper mapper, IUsuarioRepository usuarioRepository)
         {
-            _context = context;
+            _mapper = mapper;
+            _usuarioRepository = usuarioRepository;
         }
 
         [HttpGet]
@@ -21,8 +26,9 @@ namespace BE_Proyecto.Controllers
         {
             try
             {
-                var listUsuarios = await _context.Usuarios.ToListAsync();
-                return Ok(listUsuarios);
+                var listUsuarios = await _usuarioRepository.GetListUsuarios();
+                var listUsuariosDto = _mapper.Map<IEnumerable<UsuarioDTO>>(listUsuarios);
+                return Ok(listUsuariosDto);
             }
             catch (Exception ex)
             {
@@ -35,31 +41,31 @@ namespace BE_Proyecto.Controllers
         {
             try
             {
-                var usuario = await _context.Usuarios.FindAsync(id);
+                var usuario = await _usuarioRepository.GetUsuario(id);
                 if (usuario == null)
                 {
                     return NotFound();
                 }
-                return Ok(usuario);
+                var usuarioDto = _mapper.Map<UsuarioDTO>(usuario);
+                return Ok(usuarioDto);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var usuario = await _context.Usuarios.FindAsync(id);
+                var usuario = await _usuarioRepository.GetUsuario(id);
                 if (usuario == null)
                 {
                     return NotFound();
                 }
-                _context.Usuarios.Remove(usuario);
-                await _context.SaveChangesAsync();
+                await _usuarioRepository.DeleteUsuario(usuario);
                 return NoContent();
             }
             catch (Exception ex)
@@ -69,13 +75,17 @@ namespace BE_Proyecto.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Usuario usuario)
+        public async Task<IActionResult> Post(UsuarioDTO usuarioDto)
         {
             try
             {
-                _context.Add(usuario);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction("Get", new { id = usuario.Id }, usuario);
+                var usuario = _mapper.Map<Usuario>(usuarioDto);
+
+                usuario = await _usuarioRepository.AddUsuario(usuario);
+
+                var usuarioItemDto = _mapper.Map<UsuarioDTO>(usuario);
+
+                return CreatedAtAction("Get", new { id = usuarioItemDto.Id }, usuarioItemDto);
             }
             catch (Exception ex)
             {
@@ -84,16 +94,17 @@ namespace BE_Proyecto.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Usuario usuario)
+        public async Task<IActionResult> Put(int id, UsuarioDTO usuarioDto)
         {
             try
             {
+                var usuario = _mapper.Map<Usuario>(usuarioDto);
+
                 if (id != usuario.Id)
                 {
                     return BadRequest();
                 }
-                _context.Update(usuario);
-                await _context.SaveChangesAsync();
+                await _usuarioRepository.UpdateUsuario(usuario);
                 return NoContent();
             }
             catch (Exception ex)
@@ -101,6 +112,6 @@ namespace BE_Proyecto.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
     }
 }
